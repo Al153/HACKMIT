@@ -3,19 +3,33 @@ import datetime
 import imutils
 import time
 import cv2
+import uuid
 import numpy as np
  
+
+
+
 min_area = 3500
 threshold = 20
 dilation = 10
-skew = 100
+skewtop = 0
+skewbottom = 0
+foot_radius = 30
 camera = cv2.VideoCapture(0)
 time.sleep(0.25)
  
 
+
+positions = []
+positions.append([])
+positions.append([])
+positions.append([])
+
+
  
 # initialize the first frame in the video stream
 firstFrame = None
+
 
 
 # loop over the frames of the video
@@ -42,6 +56,16 @@ while True:
         dilation += 1
     elif key == ord("p"):
         dilation -= 1
+    elif key == ord("g"):
+        skewtop += 10
+    elif key == ord("h"):
+        skewtop -= 10
+    elif key == ord("j"):
+        skewbottom += 10
+    elif key == ord("k"):
+        skewbottom -= 10
+
+    
 
  
 
@@ -50,9 +74,8 @@ while True:
     frame = imutils.resize(frame, width=500)
     width = frame.shape[1]
     height = frame.shape[0]
-    pts1 = np.float32([[skew,0],[width-skew,0],[0,height],[width,height]])
+    pts1 = np.float32([[skewtop,0],[width-skewtop,0],[skewbottom,height],[width-skewbottom,height]])
     pts2 = np.float32([[0,0],[width,0],[0,height],[width,height]])
-    
     M = cv2.getPerspectiveTransform(pts1,pts2)
    
     frame = cv2.warpPerspective(frame,M,(width,height))
@@ -63,6 +86,7 @@ while True:
     # if the first frame is None, initialize it
     if firstFrame is None or key == ord("r"):
         firstFrame = gray
+        squares = None
         continue    
     # compute the diff
     frameDelta = cv2.absdiff(firstFrame, gray)
@@ -73,6 +97,15 @@ while True:
     (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
 
+
+    #floor plan
+    floor = np.zeros((height,width,3), np.uint8)
+
+
+
+
+
+
     for c in cnts:
         if cv2.contourArea(c) < min_area:
             continue
@@ -81,8 +114,25 @@ while True:
         # and update the text
         (x, y, w, h) = cv2.boundingRect(c)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        feetpos = (x+w/2 , y+h-foot_radius , uuid.uuid4().int , time.time())
+        
+        
+        
 
-    
+        for past_poss in positions[-14:]:
+            for past_pos in past_poss:
+                dist = ( (feetpos[0] - past_pos[0])**2 + (feetpos[1] - feetpos[1])**2 )** 0.5
+                
+                if dist < foot_radius:
+                    feetpos = (feetpos[0],feetpos[1],past_pos[2],feetpos[3])
+                    break
+
+        positions[-0].append(feetpos)
+
+        cv2.circle(floor,(feetpos[0],feetpos[1]), foot_radius, (int(feetpos[2]%244),int(feetpos[2]%244),int(feetpos[2]%244)), -1)
+
+
+
     # draw the text and timestamp on the frame
     cv2.putText(frame, "Threshold t/y   Min area u/i Dilation o/p", (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
@@ -96,9 +146,11 @@ while True:
         (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
     # show the frame and record if the user presses a key
-    cv2.imshow("Security Feed", frame)
+    
     cv2.imshow("Thresh", thresh)
     cv2.imshow("Frame Delta", frameDelta)
+    cv2.imshow("2D Plan",floor)
+    cv2.imshow("Feed", frame)
 
 
 
