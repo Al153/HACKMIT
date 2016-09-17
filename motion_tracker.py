@@ -38,7 +38,8 @@ while True:
 	elif key == ord("o"):
 		dilation += 1
 	elif key == ord("p"):
-		dilation -= 1
+		if dilation > 0:
+			dilation -= 1
  
 
  
