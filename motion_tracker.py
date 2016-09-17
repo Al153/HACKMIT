@@ -25,6 +25,7 @@ while True:
     (grabbed, frame) = camera.read()
     text = "Unoccupied"
 
+
     # if the `q` key is pressed, break from the lop
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
@@ -41,6 +42,7 @@ while True:
         dilation += 1
     elif key == ord("p"):
         dilation -= 1
+
  
 
  
