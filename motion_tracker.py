@@ -4,8 +4,9 @@ import imutils
 import time
 import cv2
  
-min_area = 500
-threshold = 25
+min_area = 3500
+threshold = 20
+dilation = 10
 camera = cv2.VideoCapture(0)
 time.sleep(0.25)
  
@@ -31,9 +32,13 @@ while True:
 	elif key == ord("y"):
 		threshold -= 1
 	elif key == ord("u"):
-		min_area += 1
+		min_area += 100
 	elif key == ord("i"):
-		min_area -= 1
+		min_area -= 100
+	elif key == ord("o"):
+		dilation += 1
+	elif key == ord("p"):
+		dilation -= 1
  
 
  
@@ -53,7 +58,7 @@ while True:
  
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
-	thresh = cv2.dilate(thresh, None, iterations=2)
+	thresh = cv2.dilate(thresh, None, iterations=dilation)
 	(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)
  
@@ -70,11 +75,13 @@ while True:
 
 	
 	# draw the text and timestamp on the frame
-	cv2.putText(frame, "Threshold t/y   Min area u/i", (10, 20),
+	cv2.putText(frame, "Threshold t/y   Min area u/i Dilation o/p", (10, 20),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, "Threshold: {}".format(threshold), (10, 40),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, "Min area: {}".format(min_area), (10, 60),
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+	cv2.putText(frame, "Dilation: {}".format(dilation), (10, 80),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
 		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
