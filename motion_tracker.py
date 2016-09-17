@@ -30,6 +30,10 @@ while True:
 		threshold += 1
 	elif key == ord("y"):
 		threshold -= 1
+	elif key == ord("u"):
+		min_area += 1
+	elif key == ord("i"):
+		min_area -= 1
  
 
  
@@ -63,7 +67,17 @@ while True:
 		# and update the text
 		(x, y, w, h) = cv2.boundingRect(c)
 		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-		text = "Occupied"
+
+	
+	# draw the text and timestamp on the frame
+	cv2.putText(frame, "Threshold t/y   Min area u/i", (10, 20),
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+	cv2.putText(frame, "Threshold: {}".format(threshold), (10, 40),
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+	cv2.putText(frame, "Min area: {}".format(min_area), (10, 60),
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+	cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
 	# show the frame and record if the user presses a key
 	cv2.imshow("Security Feed", frame)
