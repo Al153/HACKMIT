@@ -16,10 +16,10 @@ import threading
 
 min_area = 3500
 threshold = 20
-dilation = 10
+dilation = 8
 skewtop = 0
 skewbottom = 0
-foot_radius = 30
+foot_radius = 40
 upload_interval = 0.25
 last_upload_time = 0
 uploading = False
@@ -42,7 +42,7 @@ positions.append([])
 
  
 # initialize the first frame in the video stream
-firstFrame = None
+avg = None
 
 #initilise firebase
 firebase = firebase.FirebaseApplication('https://mithack2016-a7c0c.firebaseio.com', None)
@@ -71,14 +71,6 @@ while True:
         dilation += 1
     elif key == ord("p"):
         dilation -= 1
-    elif key == ord("g"):
-        skewtop += 10
-    elif key == ord("h"):
-        skewtop -= 10
-    elif key == ord("j"):
-        skewbottom += 10
-    elif key == ord("k"):
-        skewbottom -= 10
     elif key == ord("l"):
         uploading != uploading
     elif key == ord("w"):
@@ -116,20 +108,21 @@ while True:
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
- 
+    
     # if the first frame is None, initialize it
-    if firstFrame is None or key == ord("r"):
-        firstFrame = gray
+    if avg is None or key == ord("r"):
         squares = None
         current_point = 0
-        skew = False
+        avg = gray.copy().astype("float")
         continue    
     # compute the diff
-    frameDelta = cv2.absdiff(firstFrame, gray)
+    cv2.accumulateWeighted(gray,avg,0.002)
+    
+    frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
     thresh = cv2.threshold(frameDelta, threshold, 255, cv2.THRESH_BINARY)[1]
  
     # dilate the thresholded image
-    thresh = cv2.dilate(thresh, None, iterations=dilation)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(dilation,dilation)))
     (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
 
@@ -192,7 +185,7 @@ while True:
     # show the frame and record if the user presses a key
     
     cv2.imshow("Thresh", thresh)
-    cv2.imshow("Frame Delta", frameDelta)
+    cv2.imshow("Frame Delta", cv2.convertScaleAbs(avg))
     cv2.imshow("2D Plan",floor)
     cv2.imshow("Feed", frame)
 
