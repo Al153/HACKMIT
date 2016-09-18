@@ -22,9 +22,15 @@ skewbottom = 0
 foot_radius = 30
 upload_interval = 0.25
 last_upload_time = 0
+uploading = False
 camera = cv2.VideoCapture(0)
 time.sleep(0.25)
 roughtime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
+skew = False
+skewed_rect = [[50,50],[200,50],[200,200],[50,200]]
+
+current_point = 0
  
 
 
@@ -73,6 +79,24 @@ while True:
         skewbottom += 10
     elif key == ord("k"):
         skewbottom -= 10
+    elif key == ord("l"):
+        uploading != uploading
+    elif key == ord("w"):
+         skewed_rect[current_point][1] -= 10
+    elif key == ord("s"):
+         skewed_rect[current_point][1] += 10
+    elif key == ord("a"):
+         skewed_rect[current_point][0] -= 10
+    elif key == ord("d"):
+         skewed_rect[current_point][0] += 10
+    elif key == ord("f"):
+        if current_point<3:
+            current_point += 1
+        else:
+            view_skew_rect = skewed_rect
+            skew = True
+
+
 
     
 
@@ -83,11 +107,12 @@ while True:
     frame = imutils.resize(frame, width=500)
     width = frame.shape[1]
     height = frame.shape[0]
-    pts1 = np.float32([[skewtop,0],[width-skewtop,0],[skewbottom,height],[width-skewbottom,height]])
-    pts2 = np.float32([[0,0],[width,0],[0,height],[width,height]])
-    M = cv2.getPerspectiveTransform(pts1,pts2)
-   
-    frame = cv2.warpPerspective(frame,M,(width,height))
+    if skew:
+        
+        pts1 = np.float32(skewed_rect)
+        pts2 = np.float32([[0,0],[width,0],[width,height],[0,height]])
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        frame = cv2.warpPerspective(frame,M,(width,height))
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -96,6 +121,8 @@ while True:
     if firstFrame is None or key == ord("r"):
         firstFrame = gray
         squares = None
+        current_point = 0
+        skew = False
         continue    
     # compute the diff
     frameDelta = cv2.absdiff(firstFrame, gray)
@@ -143,7 +170,7 @@ while True:
 
 
     # draw the text and timestamp on the frame
-    cv2.putText(frame, "Threshold t/y   Min area u/i Dilation o/p", (10, 20),
+    cv2.putText(frame, "Threshold t/y   Min area u/i Dilation o/p Uploading l Sqew g/h/j/k", (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "Threshold: {}".format(threshold), (10, 40),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
@@ -151,8 +178,16 @@ while True:
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "Dilation: {}".format(dilation), (10, 80),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Uploading: {}".format(uploading), (10, 100),
+        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
         (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+
+    #Drawing the squed_rectangle
+    if not skew:
+        pts = np.array(skewed_rect, np.int32)
+        pts = pts.reshape((-1,1,2))
+        cv2.polylines(frame,[pts],True,(0,255,255))
 
     # show the frame and record if the user presses a key
     
@@ -168,11 +203,11 @@ while True:
             data[pos[2]]= {'x': pos[0], 'y': pos[1], 'time': pos[2]}
         result = firebase.post('/{}'.format(roughtime), json.dumps(data))
         print(result)
-
-    if  time.time() - last_upload_time > upload_interval:
-        t = threading.Thread(target=post_positions)
-        t.start()
-        last_upload_time = time.time()
+    if uploading:
+        if  time.time() - last_upload_time > upload_interval:
+            t = threading.Thread(target=post_positions)
+            t.start()
+            last_upload_time = time.time()
     
 
     
@@ -186,3 +221,5 @@ while True:
 # cleanup the camera and close any open windows
 camera.release()
 cv2.destroyAllWindows()
+
+
