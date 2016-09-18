@@ -1,0 +1,151 @@
+{
+  "beaker" : "2",
+  "evaluators" : [ {
+    "name" : "HTML",
+    "plugin" : "HTML",
+    "view" : {
+      "cm" : {
+        "mode" : "smartHTMLMode"
+      }
+    }
+  }, {
+    "name" : "JavaScript",
+    "plugin" : "JavaScript",
+    "view" : {
+      "cm" : {
+        "mode" : "javascript",
+        "background" : "#FFE0F0"
+      }
+    },
+    "languageVersion" : "ES2015"
+  }, {
+    "name" : "R",
+    "plugin" : "R",
+    "view" : {
+      "cm" : {
+        "mode" : "r"
+      }
+    }
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "Python3",
+    "plugin" : "Python3",
+    "setup" : "%matplotlib inline\nimport numpy\nimport matplotlib\nfrom matplotlib import pylab, mlab, pyplot\nnp = numpy\nplt = pyplot\nfrom IPython.display import display\nfrom IPython.core.pylabtools import figsize, getfigs\nfrom pylab import *\nfrom numpy import *\n",
+    "view" : {
+      "cm" : {
+        "mode" : "python"
+      }
+    }
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "IPython",
+    "plugin" : "IPython",
+    "setup" : "%matplotlib inline\nimport numpy\nimport matplotlib\nfrom matplotlib import pylab, mlab, pyplot\nnp = numpy\nplt = pyplot\nfrom IPython.display import display\nfrom IPython.core.pylabtools import figsize, getfigs\nfrom pylab import *\nfrom numpy import *\n",
+    "view" : {
+      "cm" : {
+        "mode" : "python"
+      }
+    }
+  }, {
+    "name" : "IPython_EVVTzd",
+    "plugin" : "IPython",
+    "setup" : "%matplotlib inline\nimport numpy\nimport matplotlib\nfrom matplotlib import pylab, mlab, pyplot\nnp = numpy\nplt = pyplot\nfrom IPython.display import display\nfrom IPython.core.pylabtools import figsize, getfigs\nfrom pylab import *\nfrom numpy import *\n",
+    "view" : {
+      "cm" : {
+        "mode" : "python"
+      }
+    }
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "",
+    "plugin" : "Python3"
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "",
+    "plugin" : "IPython"
+  }, {
+    "name" : "IPython_WaD4Eh",
+    "plugin" : "IPython",
+    "setup" : "%matplotlib inline\nimport numpy\nimport matplotlib\nfrom matplotlib import pylab, mlab, pyplot\nnp = numpy\nplt = pyplot\nfrom IPython.display import display\nfrom IPython.core.pylabtools import figsize, getfigs\nfrom pylab import *\nfrom numpy import *\n",
+    "view" : {
+      "cm" : {
+        "mode" : "python"
+      }
+    }
+  }, {
+    "name" : "IPython_ZaaRUY",
+    "plugin" : "IPython",
+    "setup" : "%matplotlib inline\nimport numpy\nimport matplotlib\nfrom matplotlib import pylab, mlab, pyplot\nnp = numpy\nplt = pyplot\nfrom IPython.display import display\nfrom IPython.core.pylabtools import figsize, getfigs\nfrom pylab import *\nfrom numpy import *\n",
+    "view" : {
+      "cm" : {
+        "mode" : "python"
+      }
+    }
+  } ],
+  "cells" : [ {
+    "id" : "codeqviUzy",
+    "type" : "code",
+    "evaluator" : "Python3",
+    "input" : {
+      "body" : [ "import json", "import csv", "import requests", "", "class jsonGetter(object):", "\tdef __init__(self,firebaseName):", "\t\tself.json_data = requests.get(firebaseName)", "\t\tprint(\"got data\")", "\t\tif self.json_data.status_code != 200:", "\t\t\t#raise .", "\t\t\tprint(\"Error: bad request\")", "\t\tself.json_data = self.json_data.json()", "\tdef getData(self): # ( -> { \"time\": time, \"x\":x, \"x\":y  })", "\t\ttimePeriods = [key for key in self.json_data]", "\t\tlatestFootage = sorted(timePeriods,key=str.lower)[0]", "\t\t#for timePeriod in self.json_data:", "\t\tsubDict = self.json_data[latestFootage]", "\t\tfor frameName in subDict:", "\t\t\tframe = json.loads(subDict[frameName])", "\t\t\tfor entityId in frame:", "\t\t\t\tyield frame[entityId]", "", "", "def firebaseToCsv(csvFileName, firebaseName):", "    with open(csvFileName, 'w') as csvFile: ", "        writer = csv.DictWriter(csvFile, fieldnames = ['x','y'],lineterminator = '\\n')", "        getter = jsonGetter(firebaseName)", "        writer.writeheader()", "        for event in getter.getData():", "            try:", "                xValue = event['x']", "                yValue = event['y']", "            except KeyError:", "                xValue = event['width']", "                yValue = event['height']", "            csvData = {'x': xValue,'y': yValue}", "            print (event)", "            writer.writerow(csvData)", "", "firebaseToCsv(\"/mnt/projects/c9dfa99e-7d58-11e6-a1ae-9bb94fbfab7e/myCsv.csv\",\"https://mithack2016-a7c0c.firebaseio.com/.json\")", "" ]
+    },
+    "output" : {
+      "state" : { },
+      "result" : {
+        "type" : "Results",
+        "outputdata" : [ {
+          "type" : "out",
+          "value" : "got data\n{'height': 250, 'width': 249, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n{'height': 250, 'width': 250, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n{'height': 250, 'width': 250, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n{'height': 146, 'width': 252, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 249, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n{'height': 250, 'width': 250, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n{'height': 250, 'width': 250, 'time': 251145223539303682510500366561433687971}\n{'height': 250, 'width': 157, 'time': 80266723271568350723447216597874896332}\n"
+        } ]
+      },
+      "selectedType" : "Results",
+      "height" : 263,
+      "pluginName" : "Python3",
+      "shellId" : "A52397335FEF4570AF8F4982A91CB3CE",
+      "elapsedTime" : 901
+    },
+    "evaluatorReader" : true,
+    "lineCount" : 41
+  }, {
+    "id" : "codeW73Khc",
+    "type" : "code",
+    "evaluator" : "R",
+    "input" : {
+      "body" : [ "data <- read.csv(\"/mnt/projects/c9dfa99e-7d58-11e6-a1ae-9bb94fbfab7e/myCsv.csv\")", "x <- data[,1]", "y <- data[,2]", "jet.colors <-", "  colorRampPalette(c(\"#00007F\", \"blue\", \"#007FFF\", \"cyan\",", "                     \"#7FFF7F\", \"yellow\", \"#FF7F00\", \"red\", \"#7F0000\"))", "", "d <- structure(list(X=x,Y=y, .Names= c(\"X\", \"Y\"), class = \" data.frame \", row.names=c(NA, 20L)))", "require(MASS)", "dens <- kde2d(d$X, d$Y) ", "filled.contour(dens, color=jet.colors)", "" ]
+    },
+    "output" : {
+      "state" : { },
+      "result" : {
+        "type" : "BeakerDisplay",
+        "innertype" : "Error",
+        "object" : [ "Error in kde2d(d$X, d$Y) : bandwidths must be strictly positive", "" ]
+      },
+      "selectedType" : "BeakerDisplay",
+      "pluginName" : "R",
+      "shellId" : "7da9d391-72df-4537-b35b-242d1b1aac62",
+      "elapsedTime" : 100,
+      "height" : 81
+    },
+    "evaluatorReader" : true,
+    "lineCount" : 12
+  } ],
+  "namespace" : {
+    "beakerLab" : {
+      "type" : "TableDisplay",
+      "values" : [ [ "notebookId", "f13237f0-7d58-11e6-acac-97cc0eabe73a" ], [ "notebookProject", "c9dfa99e-7d58-11e6-a1ae-9bb94fbfab7e" ], [ "storageServicePath", "/storage/3f887a90-7d22-11e6-9565-e73268eed92d/spaces/projects/files/c9dfa99e-7d58-11e6-a1ae-9bb94fbfab7e/" ], [ "storageFilePath", "/mnt/projects/c9dfa99e-7d58-11e6-a1ae-9bb94fbfab7e/" ] ],
+      "subtype" : "Dictionary",
+      "columnNames" : [ "Key", "Value" ]
+    }
+  }
+}
