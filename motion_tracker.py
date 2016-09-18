@@ -2,9 +2,14 @@ import argparse
 import datetime
 import imutils
 import time
+from time import strftime, gmtime
 import cv2
 import uuid
 import numpy as np
+from firebase import firebase
+import urllib2
+import json
+import threading
  
 
 
@@ -15,8 +20,11 @@ dilation = 10
 skewtop = 0
 skewbottom = 0
 foot_radius = 30
+upload_interval = 0.25
+last_upload_time = 0
 camera = cv2.VideoCapture(0)
 time.sleep(0.25)
+roughtime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
  
 
 
@@ -30,7 +38,8 @@ positions.append([])
 # initialize the first frame in the video stream
 firstFrame = None
 
-
+#initilise firebase
+firebase = firebase.FirebaseApplication('https://mithack2016-a7c0c.firebaseio.com', None)
 
 # loop over the frames of the video
 while True:
@@ -151,6 +160,25 @@ while True:
     cv2.imshow("Frame Delta", frameDelta)
     cv2.imshow("2D Plan",floor)
     cv2.imshow("Feed", frame)
+
+    #Upload to firebase
+    def post_positions(): 
+        data = {}
+        for pos in positions[-0]:
+            data[pos[2]]= {'x': pos[0], 'y': pos[1], 'time': pos[2]}
+        result = firebase.post('/{}'.format(roughtime), json.dumps(data))
+        print(result)
+
+    if  time.time() - last_upload_time > upload_interval:
+        t = threading.Thread(target=post_positions)
+        t.start()
+        last_upload_time = time.time()
+    
+
+    
+
+    
+    
 
 
 
